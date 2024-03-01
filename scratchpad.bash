@@ -66,7 +66,10 @@ if [ -z "${id}" ]; then
 	echo $1
 	case "$executable" in
 		ddcalc)
-			st -g90x25 -t "ddcalc" -c "ddcalc" -e ${pwd}/ddcalc.bash
+			st -g90x25 -t "ddcalc" -c "ddcalc" -e lua5.4 ${pwd}/ddcalc.lua
+			;;
+		units)
+			st -g90x25 -t "units" -c "units" -e units --verbose
 			;;
 		yubioath-desktop)
 			yubioath-desktop
