@@ -15,10 +15,10 @@ updateTitle(){
 
 file="$HOME/.local/share/scratchpad"
 
-pwd="/media/daten/coding/scratchpad"
+pwd="$(dirname "$(readlink -f "${0}")")"
 
 if [ $# = 0 ]; then
-    cat <<EOF
+	cat <<EOF
 Usage: $(basename "${0}") process_name [executable_name] [--take-first]
     process_name       As recognized by 'xdo' command
     executable_name    As used for launching from terminal
@@ -26,7 +26,7 @@ Usage: $(basename "${0}") process_name [executable_name] [--take-first]
     --current          Add the current window to the scratchpad
     --show             Show one of the scratchpad windows
 EOF
-    exit 0
+exit 0
 fi
 
 # Get id of process by class name and then fallback to instance name
@@ -36,29 +36,29 @@ executable=${1}
 shift
 
 while [ -n "${1}" ]; do
-    case ${1} in
-    --take-first)
-        id=$(head -1 <<<"${id}" | cut -f1 -d' ')
-        ;;
-	--current)
-		id="$(xdo id)"
-		[[ -z "$id" ]] && exit
-		echo "$id" >> $file
-		tmp="$(mktemp)"
-		cp -f "$file" "$tmp"
-		sort -u "$tmp" > "$file"
-		;;
-	--show)
-		id=$(cat "$file" | updateTitle | dmenu -f -i -l 10)
-		[[ -z "$id" ]] && exit
-		id="${id%%+*}"
-		sed -i '/'"$id"'/d' "$file"
-		;;
-    *)
-        executable=${1}
-        ;;
-    esac
-    shift
+	case ${1} in
+		--take-first)
+			id=$(head -1 <<<"${id}" | cut -f1 -d' ')
+			;;
+		--current)
+			id="$(xdo id)"
+			[[ -z "$id" ]] && exit
+			echo "$id" >> $file
+			tmp="$(mktemp)"
+			cp -f "$file" "$tmp"
+			sort -u "$tmp" > "$file"
+			;;
+		--show)
+			id=$(cat "$file" | updateTitle | dmenu -f -i -l 10)
+			[[ -z "$id" ]] && exit
+			id="${id%%+*}"
+			sed -i '/'"$id"'/d' "$file"
+			;;
+		*)
+			executable=${1}
+			;;
+	esac
+	shift
 done
 
 # launch
@@ -75,12 +75,12 @@ if [ -z "${id}" ]; then
 			yubioath-desktop
 			;;
 		*)
-    		${executable}
-		;;
+			${executable}
+			;;
 	esac
 else
-    while read -r instance; do
+	while read -r instance; do
 		# toggle flag
-        bspc node "${instance}" --flag hidden --flag sticky --to-monitor focused --focus
-    done <<<"${id}"
+		bspc node "${instance}" --flag hidden --flag sticky --to-monitor focused --focus
+	done <<<"${id}"
 fi
